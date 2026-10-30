@@ -1,0 +1,372 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>挖空查找十法</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+SC:wght@400;500;700&display=swap">
+<style>
+/* Layout: sticky filter bar, quick-find table, then ten technique sheets, each with 场景 / 前提 / 案例 / 步骤 */
+:root{
+  --bg:#F3F7F5; --surface:#FFFFFF; --ink:#12201C; --muted:#52645E; --line:#D3DFDA;
+  --accent:#0A7664; --accent-soft:#DCEFEA; --warn:#A8481A; --warn-soft:#F8E6DA;
+  --code-bg:#12201C; --code-fg:#DDEBE6; --code-dim:#7FA095; --kbd:#E7EFEC;
+  --font-body:"Noto Sans SC",system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1613; --surface:#142420; --ink:#E2EEEA; --muted:#93AAA3; --line:#25382F;
+    --accent:#4FD1B5; --accent-soft:#143A32; --warn:#F0A074; --warn-soft:#3A2418;
+    --code-bg:#091210; --code-fg:#D4E6E0; --code-dim:#6C8C81; --kbd:#1F342D; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1613; --surface:#142420; --ink:#E2EEEA; --muted:#93AAA3; --line:#25382F;
+  --accent:#4FD1B5; --accent-soft:#143A32; --warn:#F0A074; --warn-soft:#3A2418;
+  --code-bg:#091210; --code-fg:#D4E6E0; --code-dim:#6C8C81; --kbd:#1F342D; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--bg); color:var(--ink); font-family:var(--font-body); font-size:15px; line-height:1.7;
+  padding-block:0 56px; padding-left:max(16px,env(safe-area-inset-left,0px)); padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+.wrap{max-width:880px;margin:0 auto}
+header{padding-block:36px 20px}
+.eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.08em;color:var(--accent);text-transform:uppercase}
+h1{font-size:clamp(28px,5vw,40px);line-height:1.2;margin:6px 0 10px;font-weight:700;text-wrap:balance}
+.lede{color:var(--muted);max-width:62ch;margin:0}
+.env{margin-top:18px;display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-family:var(--font-mono);font-size:12px;border:1px solid var(--line);background:var(--surface);padding:3px 10px;border-radius:999px;color:var(--muted)}
+.chip b{color:var(--ink);font-weight:600}
+
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding-block:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.bar span{font-size:12px;color:var(--muted);margin-right:4px}
+.bar button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:4px 12px;border-radius:6px;cursor:pointer}
+.bar button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+:root[data-theme="dark"] .bar button[aria-pressed="true"]{color:#06201A}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .bar button[aria-pressed="true"]{color:#06201A}}
+button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+h2{font-size:18px;margin:36px 0 12px}
+.find{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:14px}
+th,td{text-align:left;padding:9px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:500;letter-spacing:.04em}
+tr:last-child td{border-bottom:0}
+td a{color:var(--accent);font-weight:500;text-decoration:none;white-space:nowrap}
+td a:hover{text-decoration:underline}
+
+.tip{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-top:18px;overflow:hidden;scroll-margin-top:70px}
+.tip[hidden]{display:none}
+.tip-h{display:flex;gap:14px;align-items:baseline;padding:16px 18px 6px;flex-wrap:wrap}
+.no{font-family:var(--font-mono);font-weight:600;color:var(--accent);font-size:13px}
+.tip h3{margin:0;font-size:18px;font-weight:700}
+.tag{margin-left:auto;font-size:12px;border-radius:4px;padding:1px 8px;background:var(--accent-soft);color:var(--accent);font-weight:500}
+.tip-b{padding:6px 18px 18px;display:grid;gap:14px}
+.meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:600px){.meta{grid-template-columns:minmax(0,1fr)}}
+.box{border-radius:6px;padding:10px 12px;font-size:14px;min-width:0}
+.box.when{background:var(--accent-soft)}
+.box.need{background:var(--warn-soft)}
+.box h4{margin:0 0 2px;font-size:12px;letter-spacing:.06em;font-weight:700}
+.box.when h4{color:var(--accent)} .box.need h4{color:var(--warn)}
+.box p,.box ul{margin:0} .box ul{padding-left:18px}
+.lab{font-size:12px;letter-spacing:.06em;font-weight:700;color:var(--muted);margin:0 0 4px}
+.case{margin:0 0 8px;font-size:14px}
+pre{margin:0;background:var(--code-bg);color:var(--code-fg);border-radius:6px;padding:12px 14px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.6;position:relative}
+pre .c{color:var(--code-dim)}
+.copy{position:absolute;top:6px;right:6px;font:inherit;font-size:11px;font-family:var(--font-mono);background:transparent;color:var(--code-dim);border:1px solid var(--code-dim);border-radius:4px;padding:1px 8px;cursor:pointer}
+.copy:hover{color:var(--code-fg);border-color:var(--code-fg)}
+ol.steps{margin:0;padding-left:20px;display:grid;gap:4px;font-size:14px}
+ol.steps li::marker{color:var(--accent);font-family:var(--font-mono);font-size:13px}
+code{font-family:var(--font-mono);font-size:.88em;background:var(--kbd);padding:1px 5px;border-radius:4px}
+kbd{font-family:var(--font-mono);font-size:.85em;background:var(--kbd);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;white-space:nowrap}
+.note{font-size:13px;color:var(--muted);margin:0;border-left:3px solid var(--line);padding-left:10px}
+.flow{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin:0;padding:0;list-style:none;counter-reset:s}
+.flow li{counter-increment:s;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:14px}
+.flow li::before{content:"第 " counter(s) " 步";display:block;font-family:var(--font-mono);font-size:12px;color:var(--accent);font-weight:600}
+footer{margin-top:36px;color:var(--muted);font-size:13px}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">Python 挖空题 · 查找手册</div>
+  <h1>挖空查找十法</h1>
+  <p class="lede">空里该填函数名、类名、方法还是参数，先判断空在哪，再选对应的办法。每个办法都写明适用场景、前提条件、案例和操作步骤。</p>
+  <div class="env">
+    <span class="chip">语言服务器 <b>Default (Jedi)</b></span>
+    <span class="chip">Pylance <b>未安装</b></span>
+    <span class="chip">快捷键 <b>Mac ⌘ / Windows Ctrl</b></span>
+  </div>
+</header>
+
+<div class="bar" role="group" aria-label="按类型筛选">
+  <span>筛选</span>
+  <button type="button" data-f="all" aria-pressed="true">全部 10 个</button>
+  <button type="button" data-f="ed" aria-pressed="false">编辑器内 (1-4)</button>
+  <button type="button" data-f="py" aria-pressed="false">不依赖插件 (5-7)</button>
+  <button type="button" data-f="other" aria-pressed="false">推断与回溯 (8-10)</button>
+</div>
+
+<h2>先找你的情况</h2>
+<div class="find">
+<table>
+  <thead><tr><th>空的位置 / 你的情况</th><th>先用</th><th>不行就用</th></tr></thead>
+  <tbody>
+    <tr><td>点号后面：<code>cv2.&lt;空&gt;(…)</code></td><td><a href="#t1">① 点号补全</a></td><td><a href="#t5">⑤ dir 筛选</a></td></tr>
+    <tr><td>参数名、顺序、默认值</td><td><a href="#t2">② 参数提示</a></td><td><a href="#t6">⑥ help</a></td></tr>
+    <tr><td>两个点之间：<code>os.&lt;空&gt;.join</code></td><td><a href="#t3">③ 子模块补全</a></td><td><a href="#t5">⑤ dir 筛选</a></td></tr>
+    <tr><td>想看 cv2 全部函数签名</td><td><a href="#t4">④ 转到定义</a></td><td><a href="#t6">⑥ help</a></td></tr>
+    <tr><td>名字只记得一部分字母</td><td><a href="#t5">⑤ dir 筛选</a></td><td><a href="#t7">⑦ 故意填错</a></td></tr>
+    <tr><td>名字大概记得，怕拼错</td><td><a href="#t7">⑦ 故意填错</a></td><td><a href="#t5">⑤ dir 筛选</a></td></tr>
+    <tr><td>什么工具都用不了</td><td><a href="#t8">⑧ 上下文推断</a></td><td><a href="#t9">⑨ 全项目搜索</a></td></tr>
+    <tr><td>想找自己改过的旧版本</td><td><a href="#t10">⑩ 时间线与撤销</a></td><td><a href="#t9">⑨ 全项目搜索</a></td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2>十个办法</h2>
+
+<!-- 1 -->
+<section class="tip" id="t1" data-g="ed">
+  <div class="tip-h"><span class="no">01</span><h3>点号补全列表</h3><span class="tag">编辑器内</span></div>
+  <div class="tip-b">
+    <div class="meta">
+      <div class="box when"><h4>适用场景</h4><p>空在点号后面，要填函数名、类名、方法名、常量名。</p></div>
+      <div class="box need"><h4>前提条件</h4><ul>
+        <li>已装 Python 扩展，状态栏显示 Python 版本</li>
+        <li><code>python.languageServer</code> 不是 <code>None</code></li>
+        <li>补全变量（<code>cap.</code>、<code>df.</code>）时，前面要有它的赋值语句</li></ul></div>
+    </div>
+    <div><p class="lab">案例</p><p class="case">忘了把一帧写成图片的函数叫什么。</p>
+<pre><button class="copy" type="button">复制</button>cv2.&lt;10&gt;(filename, frame)    <span class="c"># 把一帧写成图片</span></pre></div>
+    <div><p class="lab">操作步骤</p><ol class="steps">
+      <li>删掉 <code>&lt;10&gt;</code>，只留 <code>cv2.</code>，键盘光标放在点号后面。</li>
+      <li>一般会自动弹出列表；没弹就按 <kbd>Control</kbd>+<kbd>Space</kbd>（Windows 为 <kbd>Ctrl</kbd>+<kbd>Space</kbd>）。</li>
+      <li>继续输入记得的字母，如 <code>imw</code>，列表只剩 <code>imwrite</code>。</li>
+      <li>按 <kbd>Tab</kbd> 或 <kbd>Enter</kbd> 确认。</li></ol></div>
+    <p class="note">补全看的是键盘光标，不是鼠标指针。想让列表匹配单词中间的字母，在设置里取消 <code>editor.suggest.matchOnWordStartOnly</code>。</p>
+  </div>
+</section>
+
+<!-- 2 -->
+<section class="tip" id="t2" data-g="ed">
+  <div class="tip-h"><span class="no">02</span><h3>参数提示</h3><span class="tag">编辑器内</span></div>
+  <div class="tip-b">
+    <div class="meta">
+      <div class="box when"><h4>适用场景</h4><p>函数名已知，忘了参数名、个数、顺序或默认值。</p></div>
+      <div class="box need"><h4>前提条件</h4><ul>
+        <li>语言服务器可用（同 ①）</li>
+        <li>设置 <code>editor.parameterHints.enabled</code> 为开（默认开）</li></ul></div>
+    </div>
+    <div><p class="lab">案例</p><p class="case">忘了 <code>makedirs</code> 里“已存在也不报错”的参数叫什么。</p>
+<pre><button class="copy" type="button">复制</button>os.makedirs(output_dir, &lt;3&gt;=True)</pre></div>
+    <div><p class="lab">操作步骤</p><ol class="steps">
+      <li>把空删掉，写成 <code>os.makedirs(output_dir, </code>，光标停在逗号后面。</li>
+      <li>输入 <code>(</code> 或逗号时自动弹出；没弹就按 <kbd>⌘</kbd>+<kbd>Shift</kbd>+<kbd>Space</kbd>（Windows 为 <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Space</kbd>）。</li>
+      <li>看到签名 <code>makedirs(name, mode=0o777, exist_ok=False)</code>，当前位置的参数加粗。</li>
+      <li>填入 <code>exist_ok</code>。</li></ol></div>
+    <p class="note">OpenCV 是 C++ 编译库，签名可能显示不全，这时改用 ⑥ help。</p>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="tip" id="t3" data-g="ed">
+  <div class="tip-h"><span class="no">03</span><h3>两个点之间的空</h3><span class="tag">编辑器内</span></div>
+  <div class="tip-b">
+    <div class="meta">
+      <div class="box when"><h4>适用场景</h4><p>形如 <code>模块.&lt;空&gt;.函数</code>，中间是子模块或对象，例如 <code>os.path</code>、<code>np.random</code>。</p></div>
+      <div class="box need"><h4>前提条件</h4><ul>
+        <li>补全可用时用补全</li>
+        <li>补全不可用时只需能运行 Python</li></ul></div>
+    </div>
+    <div><p class="lab">案例</p><p class="case">拼接路径的函数 <code>join</code> 前面该填什么。</p>
+<pre><button class="copy" type="button">复制</button>filename = os.&lt;13&gt;.join(output_dir, "a.jpg")</pre></div>
+    <div><p class="lab">操作步骤</p><ol class="steps">
+      <li>只留 <code>os.</code> 触发补全，输入 <code>pa</code>，出现 <code>path</code>。</li>
+      <li>补全不可用时，在草稿里运行验证，删掉再交卷：</li></ol>
+<pre><button class="copy" type="button">复制</button>print([n for n in dir(os) if "path" in n])
+print("join" in dir(os.path))      <span class="c"># True 就对了</span></pre></div>
+    <p class="note">规律：凡是处理路径字符串的函数，都在 <code>os.path</code> 里。</p>
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="tip" id="t4" data-g="ed">
+  <div class="tip-h"><span class="no">04</span><h3>转到定义，进声明文件</h3><span class="tag">编辑器内</span></div>
+  <div class="tip-b">
+    <div class="meta">
+      <div class="box when"><h4>适用场景</h4><p>补全列表太长或不完整（OpenCV 常见），想直接浏览整个库的函数签名。</p></div>
+      <div class="box need"><h4>前提条件</h4><ul>
+        <li>语言服务器可用</li>
+        <li>该库带 <code>.pyi</code> 声明文件</li>
+        <li>光标要放在代码里已写好的名字上，不是空本身</li></ul></div>
+    </div>
+    <div><p class="lab">案例</p><p class="case">想查 cv2 里所有跟 write 有关的函数。</p>
+<pre><button class="copy" type="button">复制</button>cap = cv2.VideoCapture(video_path)   <span class="c"># 光标放在 VideoCapture 上</span></pre></div>
+    <div><p class="lab">操作步骤</p><ol class="steps">
+      <li>光标放在 <code>VideoCapture</code> 上，按 <kbd>F12</kbd>，或按住 <kbd>⌘</kbd> 点击它（Windows 为 <kbd>Ctrl</kbd>+点击）。</li>
+      <li>跳进一个 <code>.pyi</code> 文件，里面列着每个函数的完整签名。</li>
+      <li>在该文件里 <kbd>⌘</kbd>+<kbd>F</kbd> 搜 <code>def imwrite</code>，直接看到参数。</li>
+      <li>按 <kbd>Ctrl</kbd>+<kbd>-</kbd> 回到原位置（部分键盘设置下是 <kbd>Alt</kbd>+<kbd>←</kbd>）。</li></ol></div>
+    <p class="note">跳不过去时，运行 <code>print(cv2.__file__)</code> 找到目录，手动打开同目录的 <code>__init__.pyi</code>。</p>
+  </div>
+</section>
+
+<!-- 5 -->
+<section class="tip" id="t5" data-g="py">
+  <div class="tip-h"><span class="no">05</span><h3>dir 按关键词找名字</h3><span class="tag">不依赖插件</span></div>
+  <div class="tip-b">
+    <div class="meta">
+      <div class="box when"><h4>适用场景</h4><p>补全不可用，或只记得名字里的一部分字母（开头或中间）。</p></div>
+      <div class="box need"><h4>前提条件</h4><ul><li>只需能运行 Python，不需要任何扩展</li><li>括号里不加引号：<code>dir("cap")</code> 查的是字符串，<code>dir(cap)</code> 才是你的变量</li></ul></div>
+    </div>
+    <div><p class="lab">案例</p><p class="case">忘了 cv2 里写图片的函数，只记得有 write。</p>
+<pre><button class="copy" type="button">复制</button>import cv2
+for n in dir(cv2):
+    if "write" in n.lower():
+        print(n)            <span class="c"># imwrite、VideoWriter 等</span></pre></div>
+    <div><p class="lab">换场景只改两处：括号里的对象，和条件</p>
+      <div class="find"><table>
+        <thead><tr><th>想找</th><th>对象</th><th>条件</th></tr></thead>
+        <tbody>
+          <tr><td>DataFrame 里 drop 开头的方法</td><td><code>dir(pd.DataFrame)</code></td><td><code>n.startswith("drop")</code></td></tr>
+          <tr><td>对象 cap 有什么方法</td><td><code>dir(cap)</code></td><td><code>not n.startswith("_")</code></td></tr>
+          <tr><td>matplotlib 里含 bar 的函数</td><td><code>dir(plt)</code></td><td><code>"bar" in n</code></td></tr>
+          <tr><td>cv2 视频属性常量</td><td><code>dir(cv2)</code></td><td><code>n.startswith("CAP_PROP")</code></td></tr>
+        </tbody></table></div></div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="tip" id="t6" data-g="py">
+  <div class="tip-h"><span class="no">06</span><h3>help 查参数</h3><span class="tag">不依赖插件</span></div>
+  <div class="tip-b">
+    <div class="meta">
+      <div class="box when"><h4>适用场景</h4><p>函数名已知，补全又看不到参数，需要参数名和含义。</p></div>
+      <div class="box need"><h4>前提条件</h4><ul><li>只需能运行 Python</li><li>写 <code>help(函数名)</code>，函数名后面不加括号</li></ul></div>
+    </div>
+    <div><p class="lab">案例</p><p class="case">忘了 <code>to_excel</code> 里指定引擎的参数叫什么。</p>
+<pre><button class="copy" type="button">复制</button>import pandas as pd
+help(pd.DataFrame.to_excel)        <span class="c"># 第一行就是签名，含 engine=None</span>
+
+<span class="c"># 内容太长时，只看开头一小段</span>
+print(pd.DataFrame.to_excel.__doc__[:300])</pre></div>
+    <div><p class="lab">操作步骤</p><ol class="steps">
+      <li>运行后看输出的第一行，那是完整签名。</li>
+      <li>按空格翻页，按 <kbd>q</kbd> 退出。</li>
+      <li>OpenCV 查具体方法，如 <code>help(cv2.imwrite)</code>、<code>help(cv2.VideoCapture.read)</code>，比查整个类短得多。</li></ol></div>
+  </div>
+</section>
+
+<!-- 7 -->
+<section class="tip" id="t7" data-g="py">
+  <div class="tip-h"><span class="no">07</span><h3>故意填错，看报错提示</h3><span class="tag">不依赖插件</span></div>
+  <div class="tip-b">
+    <div class="meta">
+      <div class="box when"><h4>适用场景</h4><p>名字记个大概，想让 Python 帮你纠正；或不知道函数有哪些必填参数。</p></div>
+      <div class="box need"><h4>前提条件</h4><ul><li>Python 3.10 及以上才有 <code>Did you mean</code>（你的 3.11 满足）</li><li>只有 <code>AttributeError</code>、<code>NameError</code> 这类错误才带建议</li></ul></div>
+    </div>
+    <div><p class="lab">案例</p>
+<pre><button class="copy" type="button">复制</button><span class="c"># A 名字拼错</span>
+df.fillnaa(0)
+<span class="c"># AttributeError: ... has no attribute 'fillnaa'. Did you mean: 'fillna'?</span>
+
+<span class="c"># B 不知道必填参数</span>
+os.makedirs()
+<span class="c"># TypeError: makedirs() missing 1 required positional argument: 'name'</span>
+
+<span class="c"># C 参数名猜错</span>
+os.makedirs("a", exist=True)
+<span class="c"># TypeError: ... got an unexpected keyword argument 'exist'</span></pre></div>
+    <p class="note">填错的代码查完要改回来再交卷。C 类错误没有建议，再配合 ② 或 ⑥ 查正确名字。</p>
+  </div>
+</section>
+
+<!-- 8 -->
+<section class="tip" id="t8" data-g="other">
+  <div class="tip-h"><span class="no">08</span><h3>从代码上下文推断</h3><span class="tag">推断与回溯</span></div>
+  <div class="tip-b">
+    <div class="meta">
+      <div class="box when"><h4>适用场景</h4><p>什么工具都不想用，或环境里什么都没有。</p></div>
+      <div class="box need"><h4>前提条件</h4><p>无。靠变量名、返回值、注释和命名规律。</p></div>
+    </div>
+    <div class="find"><table>
+      <thead><tr><th>代码</th><th>线索</th><th>答案</th></tr></thead>
+      <tbody>
+        <tr><td><code>ret, frame = cap.&lt;空&gt;()</code></td><td>返回两个值，一个布尔一个画面</td><td><code>read</code></td></tr>
+        <tr><td><code>fps = cap.get(cv2.&lt;空&gt;)</code></td><td>变量叫 fps</td><td><code>CAP_PROP_FPS</code></td></tr>
+        <tr><td><code>if not cap.&lt;空&gt;():</code></td><td>判断是否打开，is 开头返回布尔</td><td><code>isOpened</code></td></tr>
+        <tr><td><code>df['成绩'].&lt;空&gt;(median_score)</code></td><td>用中位数“填充”</td><td><code>fillna</code></td></tr>
+        <tr><td><code>df.&lt;空&gt;(subset=['客户'])</code></td><td><code>subset</code> 是 dropna 的参数</td><td><code>dropna</code></td></tr>
+        <tr><td><code>cap = cv2.&lt;空&gt;(video_path)</code></td><td>首字母大写是类，变量叫 cap</td><td><code>VideoCapture</code></td></tr>
+        <tr><td><code>(A) &lt;空&gt; df['学院'].isna()</code></td><td>满足任一条件就留下</td><td><code>|</code></td></tr>
+      </tbody></table></div>
+    <p class="note">规律：类名首字母大写；is 开头返回布尔；常量全大写；成对记忆，如 <code>imread/imwrite</code>、<code>get/set</code>、<code>open/release</code>。</p>
+  </div>
+</section>
+
+<!-- 9 -->
+<section class="tip" id="t9" data-g="other">
+  <div class="tip-h"><span class="no">09</span><h3>全项目搜索</h3><span class="tag">推断与回溯</span></div>
+  <div class="tip-b">
+    <div class="meta">
+      <div class="box when"><h4>适用场景</h4><p>考场文件夹或你自己的项目里，别的脚本用过同样的函数。</p></div>
+      <div class="box need"><h4>前提条件</h4><p>无，VS Code 自带。</p></div>
+    </div>
+    <div><p class="lab">案例</p><p class="case">想不起 <code>to_csv</code> 的参数怎么写。</p>
+    <ol class="steps">
+      <li>按 <kbd>⌘</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd>（Windows 为 <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd>）。</li>
+      <li>输入 <code>to_csv</code>，下方列出所有文件里出现的位置。</li>
+      <li>点开某一条，直接看当时的完整写法。</li></ol></div>
+    <p class="note"><kbd>⌘</kbd>+<kbd>F</kbd> 只搜当前文件；<kbd>⌘</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd> 搜整个文件夹，找示例代码更有用。</p>
+  </div>
+</section>
+
+<!-- 10 -->
+<section class="tip" id="t10" data-g="other">
+  <div class="tip-h"><span class="no">10</span><h3>时间线与撤销</h3><span class="tag">推断与回溯</span></div>
+  <div class="tip-b">
+    <div class="meta">
+      <div class="box when"><h4>适用场景</h4><p>你自己改过代码，想找回之前的写法，比如挖空前的完整版。</p></div>
+      <div class="box need"><h4>前提条件</h4><ul><li>时间线只记录按过保存（<kbd>⌘</kbd>+<kbd>S</kbd>）的版本</li><li>撤销只在文件没关闭时有效</li></ul></div>
+    </div>
+    <div><p class="lab">操作步骤</p><ol class="steps">
+      <li>打开资源管理器（<kbd>⌘</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd>），展开最下方的“时间线”。</li>
+      <li>点某一条历史记录，与当前版本并排对比，差异行有颜色。</li>
+      <li>想恢复，右键该条目选“还原内容”。</li>
+      <li>文件没关时，也可以按 <kbd>⌘</kbd>+<kbd>Z</kbd> 逐步撤销。</li></ol></div>
+    <p class="note">也可以右键一个文件“选择以进行比较”，再右键另一个文件“与已选项目进行比较”，完整版和挖空版的差异一目了然。</p>
+  </div>
+</section>
+
+<footer>考场流程：先看状态栏有没有 Python 版本，在新文件里输入 <code>os.</code> 测试补全。能补全就用 ①②，不能就用 ⑤⑥，最后统一检查变量名、括号、缩进，并删掉草稿里的 <code>print(dir(...))</code>。</footer>
+</div>
+
+<script>
+(function(){
+  var btns=document.querySelectorAll('.bar button'), tips=document.querySelectorAll('.tip');
+  btns.forEach(function(b){
+    b.addEventListener('click',function(){
+      btns.forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});
+      var f=b.getAttribute('data-f');
+      tips.forEach(function(t){t.hidden=!(f==='all'||t.getAttribute('data-g')===f)});
+    });
+  });
+  document.querySelectorAll('a[href^="#t"]').forEach(function(a){
+    a.addEventListener('click',function(){
+      var id=a.getAttribute('href').slice(1), el=document.getElementById(id);
+      if(el&&el.hidden){btns[0].click()}
+    });
+  });
+  document.querySelectorAll('.copy').forEach(function(c){
+    c.addEventListener('click',function(){
+      var pre=c.parentNode, txt=pre.innerText.replace(/^复制\n?/,'').replace(/\s+$/,'');
+      function done(){c.textContent='已复制';setTimeout(function(){c.textContent='复制'},1200)}
+      function fallback(){var r=document.createRange();r.selectNodeContents(pre);var s=getSelection();s.removeAllRanges();s.addRange(r);c.textContent='已选中'; setTimeout(function(){c.textContent='复制'},1200)}
+      try{navigator.clipboard.writeText(txt).then(done,fallback)}catch(e){fallback()}
+    });
+  });
+})();
+</script>
+
+</body></html>

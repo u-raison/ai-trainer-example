@@ -12,3 +12,5 @@ desktop.ini
 # IDE
 .idea/
 .vscode/
+.github-token
+push_update.py
