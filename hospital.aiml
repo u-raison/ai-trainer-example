@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- 知识库文件跟标签的开始-->
+
+<aiml version="1.0">
+    <!-- 定义一条问题规则的开始标签-->
+    <category>
+    
+    <!--定义用户输入的问题-->
+    <pattern>口腔科在哪里</pattern>
+
+    <!--定义机器人回复内容-->
+    <template>北区三楼</template>
+    
+    <!--定义一条问答规则的结束标签-->
+    </category>
+
+    <category>
+    <pattern>急诊科在哪</pattern>
+    <template>南区一楼</template>
+    </category>
+
+    <category>
+    <pattern>挂号处怎么走</pattern>
+    <template>门诊大厅东侧</template>
+    </category>
+
+    <!--定义用户通用问题-->
+    <category>
+    <pattern>*</pattern>
+    <template>抱歉，我不太明白您的问题，请问您想了解哪个科室的位置？</template>
+    </category>
+
+</aiml>

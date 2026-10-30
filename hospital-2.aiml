@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <aiml version="1.0">
+    <!--医院导诊问答-->
+
+    <category>
+    <pattern>口腔科在哪里</pattern>
+    <template>北区三楼</template>
+    </category>
+
+    <category>
+    <pattern>急诊科在哪里</pattern>
+    <template>南区一楼</template>
+    </category>
+
+    <category>
+    <pattern>挂号处怎么走</pattern>
+    <template>门诊大厅东侧</template>
+    </category>
+
+    <category>
+    <pattern>药房在哪里</pattern>
+    <template>西区二楼</template>
+    </category>
+
+    <category>
+    <pattern>放射科在哪</pattern>
+    <template>东区地下一层</template>
+    </category>
+
+    <category>
+    <pattern>儿科在哪里</pattern>
+    <template>北区二楼</template>
+    </category>
+
+    <!--问候语-->
+    <category>
+    <pattern>您好</pattern>
+    <template>您好!我是医院智能导诊客服,请问需要咨询哪个科室的位置?</template>
+    </category>
+
+    <!-- 默认回复(通配符*) -->
+    <category>
+    <pattern>*</pattern>
+    <template>抱歉,我不太明白您的问题。请问您想了解哪个科室的位置?我可以告诉您: 口腔科、急诊科、挂号处、药房、放射科、儿科等位置信息</template>
+    </category>
+    
+    </aiml>
+    
