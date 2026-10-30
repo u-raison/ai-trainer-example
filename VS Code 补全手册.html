@@ -1,0 +1,314 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>VS Code 补全手册</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+SC:wght@400;500;700&display=swap">
+<style>
+/* Layout: header, sticky status filter, master table, settings blocks, Tab repair sequence, file locations */
+:root{
+  --bg:#F1F4F9; --surface:#FFFFFF; --ink:#142033; --muted:#566377; --line:#D5DCE8;
+  --accent:#2D4FD6; --accent-soft:#E1E8FD;
+  --ok:#17784A; --ok-soft:#DDF3E7;
+  --pyext:#5B3FC4; --pyext-soft:#E9E3FA;
+  --manual:#9A5209; --manual-soft:#FBEBD3;
+  --plug:#B42E4F; --plug-soft:#FADDE4;
+  --code-bg:#101826; --code-fg:#DCE5F5; --code-dim:#7C8CA8; --kbd:#E8EDF6;
+  --font-body:"Noto Sans SC",system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0C121D; --surface:#131C2B; --ink:#E3E9F4; --muted:#98A5BA; --line:#25324A;
+    --accent:#8EA6FF; --accent-soft:#1D2A52;
+    --ok:#6AD7A0; --ok-soft:#123626;
+    --pyext:#B6A3FF; --pyext-soft:#2A2150;
+    --manual:#F2B26B; --manual-soft:#3B2A12;
+    --plug:#FF8FA8; --plug-soft:#3F1824;
+    --code-bg:#080D16; --code-fg:#D6E0F2; --code-dim:#6F7F9B; --kbd:#1D2940; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0C121D; --surface:#131C2B; --ink:#E3E9F4; --muted:#98A5BA; --line:#25324A;
+  --accent:#8EA6FF; --accent-soft:#1D2A52;
+  --ok:#6AD7A0; --ok-soft:#123626;
+  --pyext:#B6A3FF; --pyext-soft:#2A2150;
+  --manual:#F2B26B; --manual-soft:#3B2A12;
+  --plug:#FF8FA8; --plug-soft:#3F1824;
+  --code-bg:#080D16; --code-fg:#D6E0F2; --code-dim:#6F7F9B; --kbd:#1D2940; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--bg); color:var(--ink); font-family:var(--font-body); font-size:15px; line-height:1.7;
+  padding-block:0 64px;
+  padding-left:max(16px,env(safe-area-inset-left,0px)); padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:960px;margin:0 auto}
+header{padding-block:36px 8px}
+.eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.08em;color:var(--accent);text-transform:uppercase}
+h1{font-size:clamp(28px,5vw,40px);line-height:1.2;margin:6px 0 10px;font-weight:700;text-wrap:balance}
+.lede{color:var(--muted);max-width:64ch;margin:0}
+h2{font-size:20px;margin:44px 0 6px;text-wrap:balance}
+h2 + .sub{color:var(--muted);margin:0 0 14px;font-size:14px;max-width:70ch}
+h3{font-size:16px;margin:0 0 6px}
+a{color:var(--accent)}
+button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.nav a{font-size:13px;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:3px 12px;text-decoration:none;color:var(--ink)}
+.nav a:hover{border-color:var(--accent);color:var(--accent)}
+
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-top:20px}
+.lg{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13px;min-width:0}
+.lg p{margin:4px 0 0;color:var(--muted)}
+
+.pill{display:inline-block;font-size:12px;font-weight:500;border-radius:4px;padding:1px 8px;white-space:nowrap}
+.s-ok{background:var(--ok-soft);color:var(--ok)}
+.s-py{background:var(--pyext-soft);color:var(--pyext)}
+.s-man{background:var(--manual-soft);color:var(--manual)}
+.s-plug{background:var(--plug-soft);color:var(--plug)}
+
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding-block:10px;margin-top:36px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bar span{font-size:12px;color:var(--muted);margin-right:4px}
+.bar button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:4px 12px;border-radius:6px;cursor:pointer}
+.bar button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface);margin-top:14px}
+table{border-collapse:collapse;width:100%;min-width:780px;font-size:14px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:500;letter-spacing:.04em;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+tr[hidden]{display:none}
+td.fn{font-weight:500;white-space:nowrap}
+td small{display:block;color:var(--muted);font-size:12px}
+.tw.narrow table{min-width:560px}
+
+code{font-family:var(--font-mono);font-size:.86em;background:var(--kbd);padding:1px 5px;border-radius:4px;overflow-wrap:anywhere}
+kbd{font-family:var(--font-mono);font-size:.85em;background:var(--kbd);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;white-space:nowrap}
+
+.codewrap{position:relative;margin-top:10px}
+pre{margin:0;background:var(--code-bg);color:var(--code-fg);border-radius:8px;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.65}
+pre .c{color:var(--code-dim)}
+.copy{position:absolute;top:8px;right:8px;font:inherit;font-size:11px;font-family:var(--font-mono);background:var(--code-bg);color:var(--code-dim);border:1px solid var(--code-dim);border-radius:4px;padding:1px 8px;cursor:pointer}
+.copy:hover{color:var(--code-fg);border-color:var(--code-fg)}
+.cap{font-size:13px;font-weight:700;margin:20px 0 0}
+.note{font-size:13px;color:var(--muted);margin:10px 0 0;border-left:3px solid var(--line);padding-left:10px}
+
+.seq{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:10px;counter-reset:s}
+.seq li{counter-increment:s;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px 12px 52px;position:relative;min-width:0}
+.seq li::before{content:counter(s);position:absolute;left:14px;top:12px;width:26px;height:26px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-family:var(--font-mono);font-weight:600;font-size:13px;display:flex;align-items:center;justify-content:center}
+.seq h3{font-size:15px;margin:0}
+.seq p{margin:2px 0 0;font-size:14px;color:var(--muted)}
+.seq .fix{color:var(--ink)}
+
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media (max-width:700px){.two{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px;min-width:0}
+.panel ol,.panel ul{margin:6px 0 0;padding-left:20px;font-size:14px}
+footer{margin-top:44px;color:var(--muted);font-size:13px}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">VS Code · Python · 补全与提示</div>
+  <h1>VS Code 补全手册</h1>
+  <p class="lede">每一种补全和提示是否默认开启、要不要装扩展、在哪里打开，一页看完。后面附 Tab 键失效的修复顺序和配置文件位置。</p>
+  <nav class="nav" aria-label="页内导航">
+    <a href="#table">功能总表</a><a href="#settings">配置文件写法</a><a href="#tab">Tab 失效修复</a><a href="#files">配置文件位置</a><a href="#check">考场自检</a>
+  </nav>
+  <div class="legend">
+    <div class="lg"><span class="pill s-ok">内置 · 默认开启</span><p>不装任何扩展就有，不用设置。</p></div>
+    <div class="lg"><span class="pill s-py">装 Python 扩展后默认开启</span><p>要有 Python 扩展和一个语言服务（Jedi 或 Pylance）。</p></div>
+    <div class="lg"><span class="pill s-man">需手动开启</span><p>默认关闭，要自己改设置才有。</p></div>
+    <div class="lg"><span class="pill s-plug">需另装扩展</span><p>必须额外安装插件才会出现。</p></div>
+  </div>
+</header>
+
+<div class="bar" role="group" aria-label="按状态筛选" id="table">
+  <span>筛选</span>
+  <button type="button" data-f="all" aria-pressed="true">全部</button>
+  <button type="button" data-f="ok" aria-pressed="false">内置默认开启</button>
+  <button type="button" data-f="py" aria-pressed="false">需 Python 扩展</button>
+  <button type="button" data-f="man" aria-pressed="false">需手动开启</button>
+  <button type="button" data-f="plug" aria-pressed="false">需另装扩展</button>
+</div>
+
+<div class="tw">
+<table>
+  <thead><tr><th>功能</th><th>作用</th><th>状态</th><th>设置项</th><th>触发 / 快捷键</th></tr></thead>
+  <tbody>
+    <tr data-s="ok"><td class="fn">单词补全</td><td>提示当前文件里出现过的单词，不认识库的成员</td><td><span class="pill s-ok">内置 · 默认开启</span></td><td><code>editor.wordBasedSuggestions</code><small>旧版是 true/false，新版是字符串</small></td><td>输入时自动</td></tr>
+    <tr data-s="ok"><td class="fn">自动弹出补全</td><td>输入字符时自动弹出候选列表</td><td><span class="pill s-ok">内置 · 默认开启</span></td><td><code>editor.quickSuggestions</code><small>分 other / comments / strings，注释和字符串里默认关</small></td><td>输入时自动</td></tr>
+    <tr data-s="ok"><td class="fn">点号触发补全</td><td>输入 <code>.</code> 后立即弹出成员列表</td><td><span class="pill s-ok">内置 · 默认开启</span></td><td><code>editor.suggestOnTriggerCharacters</code></td><td>输入 <kbd>.</kbd></td></tr>
+    <tr data-s="ok"><td class="fn">手动触发补全</td><td>没弹出时强制弹出</td><td><span class="pill s-ok">内置 · 默认开启</span></td><td>无</td><td><kbd>Ctrl</kbd>+<kbd>Space</kbd>；Mac 另有 <kbd>Cmd</kbd>+<kbd>I</kbd><small>Mac 的 Ctrl+Space 和 Windows 中文输入法常把它占用为切换输入法</small></td></tr>
+    <tr data-s="ok"><td class="fn">用 Tab / Enter 接受</td><td>确认选中的候选</td><td><span class="pill s-ok">内置 · 默认开启</span></td><td><code>editor.acceptSuggestionOnEnter</code><small>Tab 靠快捷键绑定，见下方修复</small></td><td><kbd>Tab</kbd> / <kbd>Enter</kbd></td></tr>
+    <tr data-s="ok"><td class="fn">默认选中第一项</td><td>列表一弹出就选中第一个候选</td><td><span class="pill s-ok">内置 · 默认开启</span></td><td><code>editor.suggest.selectionMode</code></td><td>自动</td></tr>
+    <tr data-s="ok"><td class="fn">代码片段</td><td>输入 <code>for</code>、<code>def</code> 等弹出模板</td><td><span class="pill s-ok">内置 · 默认开启</span></td><td><code>editor.snippetSuggestions</code><small>设为 none 可隐藏</small></td><td>自动</td></tr>
+    <tr data-s="man"><td class="fn">Tab 展开片段前缀</td><td>输入片段前缀后按 Tab 直接展开，不经过列表</td><td><span class="pill s-man">需手动开启</span></td><td><code>editor.tabCompletion</code><small>on / off / onlySnippets，默认 off</small></td><td><kbd>Tab</kbd></td></tr>
+    <tr data-s="man"><td class="fn">匹配单词中间的字母</td><td>输入词中间的字母也能命中候选</td><td><span class="pill s-man">需手动开启</span></td><td><code>editor.suggest.matchOnWordStartOnly</code><small>取消勾选（false）</small></td><td>输入时自动</td></tr>
+    <tr data-s="py"><td class="fn">库成员补全</td><td><code>cv2.</code>、<code>df.</code> 后列出函数、方法、常量</td><td><span class="pill s-py">需 Python 扩展</span></td><td><code>python.languageServer</code><small>不能是 None；变量要先有赋值语句</small></td><td>输入 <kbd>.</kbd> 或 <kbd>Ctrl</kbd>+<kbd>Space</kbd></td></tr>
+    <tr data-s="py"><td class="fn">参数提示</td><td>括号内显示参数名、顺序、默认值</td><td><span class="pill s-py">需 Python 扩展</span></td><td><code>editor.parameterHints.enabled</code><small>默认开，内容由语言服务提供</small></td><td>输入 <kbd>(</kbd> 或 <kbd>Cmd</kbd>/<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Space</kbd></td></tr>
+    <tr data-s="py"><td class="fn">悬停提示</td><td>鼠标停在名字上看签名和文档</td><td><span class="pill s-py">需 Python 扩展</span></td><td><code>editor.hover.enabled</code></td><td>鼠标停留</td></tr>
+    <tr data-s="py"><td class="fn">转到定义</td><td>跳到名字的定义处，可进入库的声明文件</td><td><span class="pill s-py">需 Python 扩展</span></td><td>无</td><td><kbd>F12</kbd> 或 <kbd>Cmd</kbd>/<kbd>Ctrl</kbd>+点击；返回 <kbd>Alt</kbd>+<kbd>←</kbd></td></tr>
+    <tr data-s="plug"><td class="fn">快速修复 / 自动导入</td><td>带波浪线处给出修复建议</td><td><span class="pill s-plug">需 Pylance</span><small>Jedi 下基本没有；Pylance 通常随 Python 扩展装上，卸载后需重装</small></td><td><code>editor.lightbulb.enabled</code></td><td><kbd>Cmd</kbd>/<kbd>Ctrl</kbd>+<kbd>.</kbd></td></tr>
+    <tr data-s="man"><td class="fn">波浪线报错 / 问题面板</td><td>不运行就看到未定义名字、拼错的属性</td><td><span class="pill s-man">需手动开启</span><small>还需要 Pylance</small></td><td><code>python.analysis.typeCheckingMode</code><small>改成 basic，默认是 off</small></td><td><kbd>Cmd</kbd>/<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd></td></tr>
+    <tr data-s="man"><td class="fn">补全时自动加 import</td><td>选中未导入的名字时自动补导入语句</td><td><span class="pill s-man">需手动开启</span><small>需要 Pylance，默认值因版本而异</small></td><td><code>python.analysis.autoImportCompletions</code></td><td>补全时自动</td></tr>
+    <tr data-s="man"><td class="fn">补全函数时自动加括号</td><td>选中函数后自动补 <code>()</code></td><td><span class="pill s-man">需手动开启</span><small>需要 Pylance</small></td><td><code>python.analysis.completeFunctionParens</code></td><td>补全时自动</td></tr>
+    <tr data-s="plug"><td class="fn">行内灰色建议</td><td>光标后出现整行或整段的灰色预测，按 Tab 接受</td><td><span class="pill s-plug">需另装扩展</span></td><td><code>editor.inlineSuggest.enabled</code><small>开关默认开，但没有提供者扩展就没有内容（如 Copilot）</small></td><td><kbd>Tab</kbd></td></tr>
+    <tr data-s="plug"><td class="fn">notebook 单元格补全</td><td><code>.ipynb</code> 里按变量当前状态补全</td><td><span class="pill s-plug">需另装扩展</span></td><td>Jupyter 扩展 + 内核里装 <code>ipykernel</code><small>先运行过相关单元格</small></td><td><kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd></td></tr>
+  </tbody>
+</table>
+</div>
+<p class="note">默认值会随 VS Code、Python 扩展、Pylance 的版本变化。表里标注“默认值因版本而异”的几项，以你本机设置页显示的为准。</p>
+
+<h2 id="settings">配置文件写法</h2>
+<p class="sub">settings.json 支持注释。下面两份可以直接复制：一份把补全尽量全部打开，一份用来模拟没有任何提示的考场环境。改完用 <code>Developer: Reload Window</code> 生效。</p>
+
+<p class="cap">A. 补全尽量全开</p>
+<div class="codewrap"><button class="copy" type="button">复制</button>
+<pre>{
+    <span class="c">// 语言服务：Default 即有 Pylance 用 Pylance，否则 Jedi</span>
+    "python.languageServer": "Default",
+
+    <span class="c">// 自动弹出补全，字符串里也弹出可把 strings 改成 "on"</span>
+    "editor.quickSuggestions": { "other": "on", "comments": "off", "strings": "off" },
+    "editor.suggestOnTriggerCharacters": true,
+    "editor.acceptSuggestionOnEnter": "on",
+    "editor.tabCompletion": "on",
+    "editor.suggest.selectionMode": "always",
+    "editor.snippetSuggestions": "inline",
+    "editor.wordBasedSuggestions": "matchingDocuments",   <span class="c">// 旧版本用 true</span>
+    "editor.suggest.matchOnWordStartOnly": false,
+
+    <span class="c">// 参数提示、悬停、灯泡</span>
+    "editor.parameterHints.enabled": true,
+    "editor.hover.enabled": true,
+    "editor.lightbulb.enabled": "on",
+
+    <span class="c">// 以下三项只在装了 Pylance 时有效</span>
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.completeFunctionParens": true
+}</pre></div>
+
+<p class="cap">B. 模拟无补全环境（练习用）</p>
+<div class="codewrap"><button class="copy" type="button">复制</button>
+<pre>{
+    "python.languageServer": "None",
+    "editor.quickSuggestions": { "other": "off", "comments": "off", "strings": "off" },
+    "editor.suggestOnTriggerCharacters": false,
+    "editor.wordBasedSuggestions": "off",   <span class="c">// 旧版本用 false</span>
+    "editor.snippetSuggestions": "none",
+    "editor.parameterHints.enabled": false,
+    "editor.hover.enabled": false,
+    "editor.lightbulb.enabled": "off",
+    "editor.inlineSuggest.enabled": false
+}</pre></div>
+<p class="note">只想让提示别自动弹出、需要时手动调用，把 <code>quickSuggestions</code> 三项设为 off 即可，<kbd>Ctrl</kbd>+<kbd>Space</kbd> 仍能手动弹出。</p>
+
+<p class="cap">只对 Python 生效的写法</p>
+<div class="codewrap"><button class="copy" type="button">复制</button>
+<pre>"[python]": {
+    "editor.quickSuggestions": { "other": "on", "comments": "off", "strings": "off" },
+    "editor.tabCompletion": "on"
+}</pre></div>
+
+<h2 id="tab">Tab 键失效的修复顺序</h2>
+<p class="sub">按列出的顺序逐项排查，每一步先看现象，再给修法。<code>editor.tabCompletion</code> 只管片段前缀展开，在补全列表里按 Tab 接受候选靠的是快捷键绑定，二者要分开看。</p>
+
+<ol class="seq">
+  <li><h3>状态栏有没有“Tab 键用于移动焦点”</h3><p>现象：按 Tab 光标跳出了编辑器。</p><p class="fix">修法：按 <kbd>Ctrl</kbd>+<kbd>M</kbd>（Mac 为 <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd>）切换，或点状态栏这一项。</p></li>
+  <li><h3>列表里有没有选中某一项</h3><p>现象：列表弹出了，但没有任何一项被高亮，按 Tab 只是缩进。</p><p class="fix">修法：先按 <kbd>↓</kbd> 选一项；或设置 <code>"editor.suggest.selectionMode": "always"</code>，让第一项自动选中。</p></li>
+  <li><h3>输入法是否处在组合状态</h3><p>现象：中文输入法下 Tab 被输入法接管。</p><p class="fix">修法：切到英文输入再试。</p></li>
+  <li><h3>快捷键设置里 Tab 是否还绑着 acceptSelectedSuggestion</h3><p>操作：<kbd>Cmd</kbd>/<kbd>Ctrl</kbd>+<kbd>K</kbd> 再 <kbd>Cmd</kbd>/<kbd>Ctrl</kbd>+<kbd>S</kbd>，搜 <code>acceptSelectedSuggestion</code>。</p><p class="fix">修法：绑定不见了或被改了，右键该行选“重置快捷键”。</p></li>
+  <li><h3>keybindings.json 里有没有人为删除了它</h3><p>操作：<code>Preferences: Open Keyboard Shortcuts (JSON)</code>，搜 <code>tab</code> 和 <code>-acceptSelectedSuggestion</code>。</p><p class="fix">修法：删掉带 <code>-</code> 前缀的那行，并确认下面的绑定存在。</p></li>
+  <li><h3>有没有扩展抢走了 Tab</h3><p>现象：装了 Copilot、Vim、Tabnine 等，Tab 被它们的行内建议或模式占用。</p><p class="fix">修法：逐个禁用后 <code>Developer: Reload Window</code> 对比；Copilot 可设 <code>github.copilot.enable</code> 按语言关闭。</p></li>
+  <li><h3>设置被覆盖或被锁定</h3><p>现象：改了又变回去，或设置项带锁形图标、写着由组织管理。</p><p class="fix">修法：设置页顶部看“用户”和“工作区”两个标签，工作区优先级更高；策略锁定的项只能在策略来源处改。</p></li>
+</ol>
+
+<p class="cap">快捷键绑定的标准写法（放进 keybindings.json）</p>
+<div class="codewrap"><button class="copy" type="button">复制</button>
+<pre>{
+    "key": "tab",
+    "command": "acceptSelectedSuggestion",
+    "when": "suggestWidgetHasFocusedSuggestion &amp;&amp; suggestWidgetVisible &amp;&amp; textInputFocus"
+}</pre></div>
+
+<div class="two" style="margin-top:16px">
+  <div class="panel"><h3>查出 Tab 到底触发了什么</h3>
+    <ol>
+      <li>命令面板运行 <code>Developer: Toggle Keyboard Shortcuts Troubleshooting</code></li>
+      <li>在编辑器里弹出补全列表，按一次 Tab</li>
+      <li>打开“输出”面板，选对应的通道，看触发的命令名</li>
+      <li>看完再运行一次同一命令，关闭记录</li>
+    </ol>
+  </div>
+  <div class="panel"><h3>Tab 暂时修不好时的替代</h3>
+    <ul>
+      <li>确认 <code>"editor.acceptSuggestionOnEnter": "on"</code>，改用 <kbd>Enter</kbd> 接受</li>
+      <li>用 <kbd>↑</kbd> <kbd>↓</kbd> 选候选，点击候选也能插入</li>
+      <li>继续输入前缀过滤，只剩一项时按 Enter</li>
+    </ul>
+  </div>
+</div>
+
+<h2 id="files">配置文件位置与优先级</h2>
+<p class="sub">设置按层叠加，后面的覆盖前面的：默认值，用户，远程，工作区，工作区文件夹，再到按语言的 <code>[python]</code> 块。</p>
+<div class="tw narrow">
+<table>
+  <thead><tr><th>内容</th><th>Windows</th><th>macOS</th><th>Linux</th></tr></thead>
+  <tbody>
+    <tr><td class="fn">用户设置</td><td><code>%APPDATA%\Code\User\settings.json</code></td><td><code>~/Library/Application Support/Code/User/settings.json</code></td><td><code>~/.config/Code/User/settings.json</code></td></tr>
+    <tr><td class="fn">快捷键</td><td colspan="3">同目录下的 <code>keybindings.json</code></td></tr>
+    <tr><td class="fn">代码片段</td><td colspan="3">同目录下的 <code>snippets/</code> 文件夹</td></tr>
+    <tr><td class="fn">工作区设置</td><td colspan="3">项目文件夹里的 <code>.vscode/settings.json</code></td></tr>
+    <tr><td class="fn">远程环境</td><td colspan="3">远程机器上的 <code>~/.vscode-server/data/Machine/settings.json</code></td></tr>
+    <tr><td class="fn">Pylance 分析配置</td><td colspan="3">项目里的 <code>pyrightconfig.json</code>，或 <code>pyproject.toml</code> 中的 <code>[tool.pyright]</code></td></tr>
+  </tbody>
+</table>
+</div>
+<p class="note">快速打开：<kbd>Cmd</kbd>/<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>，输入 <code>Preferences: Open User Settings (JSON)</code> 或 <code>Open Workspace Settings (JSON)</code>。便携模式下设置在 VS Code 目录旁的 <code>data</code> 文件夹里。设置项被系统策略锁定时，改 settings.json 通常压不过策略。</p>
+
+<h2 id="check">考场 10 秒自检</h2>
+<div class="two">
+  <div class="panel"><h3>看环境有什么</h3>
+    <ol>
+      <li>右下角状态栏有没有 Python 版本，没有说明没选解释器或没装 Python 扩展</li>
+      <li>新建 <code>.py</code>，输入 <code>os.</code>，弹出成员列表说明语言服务可用</li>
+      <li>扩展面板确认有没有 Pylance、Jupyter、Copilot</li>
+    </ol>
+  </div>
+  <div class="panel"><h3>没有补全时的兜底</h3>
+    <ul>
+      <li><code>dir(对象)</code> 配合关键词筛选，找函数、方法、常量名</li>
+      <li><code>help(函数)</code> 或 <code>inspect.signature</code> 查参数</li>
+      <li><code>plt.setp(画图对象)</code> 查 matplotlib 参数和可填的值</li>
+      <li>故意填错，看 <code>Did you mean</code> 提示</li>
+    </ul>
+  </div>
+</div>
+
+<footer>考试机的环境通常由管理员统一配置，是否允许调整设置请先向考务人员确认。自己的电脑上可以放心按本页逐项开关，提前摸清每一项的效果。</footer>
+</div>
+
+<script>
+(function(){
+  var btns=document.querySelectorAll('.bar button'), rows=document.querySelectorAll('tbody tr[data-s]');
+  btns.forEach(function(b){
+    b.addEventListener('click',function(){
+      btns.forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});
+      var f=b.getAttribute('data-f');
+      rows.forEach(function(r){r.hidden=!(f==='all'||r.getAttribute('data-s')===f)});
+    });
+  });
+  document.querySelectorAll('.copy').forEach(function(c){
+    c.addEventListener('click',function(){
+      var pre=c.parentNode.querySelector('pre'), txt=pre.innerText.replace(/\s+$/,'');
+      function reset(t){c.textContent=t;setTimeout(function(){c.textContent='复制'},1200)}
+      function fallback(){var r=document.createRange();r.selectNodeContents(pre);var s=getSelection();s.removeAllRanges();s.addRange(r);reset('已选中')}
+      try{navigator.clipboard.writeText(txt).then(function(){reset('已复制')},fallback)}catch(e){fallback()}
+    });
+  });
+})();
+</script>
+
+</body></html>
